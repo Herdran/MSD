@@ -16,8 +16,16 @@ public class Point {
 //        max_vel = 0;
 //    }
 
+    public void becomePoint(Point point) {
+        type = point.type;
+        moved = point.moved;
+        velocity = point.velocity;
+        max_vel = point.max_vel;
+    }
+
     public void move() {
         Point nextPoint = next;
+
         for (int nextPos = 1; nextPos < velocity; nextPos++) {
             nextPoint = nextPoint.next;
         }
@@ -26,7 +34,7 @@ public class Point {
             nextPoint.type = type;
             nextPoint.moved = true;
             nextPoint.velocity = velocity;
-            nextPoint.max_vel = 1 + 2 * type;
+            nextPoint.max_vel = max_vel;
 
             type = 0;
             moved = true;
@@ -41,14 +49,16 @@ public class Point {
     }
 
     public void slowDown() {
-    }
-
-    public void random() {
-        if (velocity >= 1){
-            if (Math.random() < 0.3){
-                velocity -= 1;
+        Point nextCar = next;
+        int distance_nextCar = 1;
+        for (; distance_nextCar < max_vel; distance_nextCar++) {
+            if (carTypes.contains(nextCar.type)){
+                break;
             }
+            nextCar = nextCar.next;
         }
+        if (distance_nextCar <= velocity)
+            velocity = distance_nextCar - 1;
     }
 
     public void clicked() {
@@ -57,48 +67,77 @@ public class Point {
 
 
     public void clear() {
-        type = 0;
+        if (type != 5)
+            type = 0;
     }
 
-    public void overtake(){
-        Point prevCar = prev;
-        int distance1 = 1;
-        for (; distance1 <= max_vel; distance1++) {
-            if (carTypes.contains(prevCar.type)){
-                if (distance1 <= velocity){
-                    velocity = distance1 + 1;
-                }
+    public boolean canOvertake(Point leftPoint){
+        Point prevCarRight = prev;
+        int distance_prevCarRight = 1;
+        for (; distance_prevCarRight < 7; distance_prevCarRight++) {
+            if (carTypes.contains(prevCarRight.type)){
                 break;
             }
-            prevCar = prevCar.prev;
+            prevCarRight = prevCarRight.prev;
         }
-        Point prevCar2 = prev;
-        int distance2 = 1;
-        for (; distance2 <= max_vel; distance2++) {
-            if (carTypes.contains(prevCar2.type)){
-                if (distance2 <= velocity){
-                    velocity = distance2 + 1;
-                }
-                break;
-            }
-            prevCar2 = prevCar2.prev;
-        }
-        Point nextCar = next;
-        int distance3 = 1;
-        for (; distance3 <= max_vel; distance3++) {
-            if (carTypes.contains(nextCar.type)){
-                if (distance3 <= velocity){
-                    velocity = distance3 - 1;
-                }
-                break;
-            }
-            nextCar = nextCar.next;
-        }
-        if ((velocity < max_vel) && (distance1 >= max_vel) && (distance2 >= max_vel) && (distance3 >= velocity)){
 
+        Point prevCarLeft = leftPoint.prev;
+        int distance_prevCarLeft = 1;
+        for (; distance_prevCarLeft < 7; distance_prevCarLeft++) {
+            if (carTypes.contains(prevCarLeft.type)){
+                break;
+            }
+            prevCarLeft = prevCarLeft.prev;
         }
+
+        Point nextCarLeft = leftPoint.next;
+        int distance_nextCarLeft = 1;
+        for (; distance_nextCarLeft < 7; distance_nextCarLeft++) {
+            if (carTypes.contains(nextCarLeft.type)){
+                break;
+            }
+            nextCarLeft = nextCarLeft.next;
+        }
+
+        if ((velocity < max_vel) && (distance_prevCarRight >= prevCarRight.max_vel) && (distance_prevCarLeft >= prevCarLeft.max_vel) && (distance_nextCarLeft >= velocity)){
+            return true;
+        }
+        return false;
     }
 
+    boolean canFinishOvertake(Point rightPoint){
+        Point prevCarLeft = prev;
+        int distance_prevCarLeft = 1;
+        for (; distance_prevCarLeft < 7; distance_prevCarLeft++) {
+            if (carTypes.contains(prevCarLeft.type)){
+                break;
+            }
+            prevCarLeft = prevCarLeft.prev;
+        }
+
+        Point prevCarRight = rightPoint.prev;
+        int distance_prevCarRight = 1;
+        for (; distance_prevCarRight < 7; distance_prevCarRight++) {
+            if (carTypes.contains(prevCarRight.type)){
+                break;
+            }
+            prevCarRight = prevCarRight.prev;
+        }
+
+        Point nextCarRight = rightPoint.next;
+        int distance_nextCarRight = 1;
+        for (; distance_nextCarRight < 7; distance_nextCarRight++) {
+            if (carTypes.contains(nextCarRight.type)){
+                break;
+            }
+            nextCarRight = nextCarRight.next;
+        }
+
+        if ((distance_prevCarRight >= prevCarRight.velocity) && (distance_prevCarLeft <= prevCarLeft.max_vel) && (distance_nextCarRight >= velocity)){
+            return true;
+        }
+        return false;
+    }
 
 }
 

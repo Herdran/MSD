@@ -19,6 +19,14 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
         setOpaque(true);
     }
 
+    private void swapPoints(Point p1, Point p2) {
+        Point temp = new Point();
+        temp.becomePoint(p2);
+        p2.becomePoint(p1);
+        p1.becomePoint(temp);
+    }
+
+
     private void initialize(int length, int height) {
         points = new Point[length][height];
 
@@ -48,12 +56,22 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 
         for (int x = 0; x < points.length; ++x) {
             for (int y = 0; y < points[x].length; ++y) {
-                points[x][y].speedUp();
-                points[x][y].slowDown();
-                points[x][y].random();
-                points[x][y].move();
+                if ((y == 2) && (!Point.carTypes.contains(points[x][y+1].type)) && (points[x][y].canFinishOvertake(points[x][y + 1]))){
+                    swapPoints(points[x][y], points[x][y + 1]);
+                    points[x][y + 1].moved = true;
+                }
+                else if ((y == 3) && (!Point.carTypes.contains(points[x][y-1].type)) && (points[x][y].canOvertake(points[x][y - 1]))){
+                    swapPoints(points[x][y], points[x][y - 1]);
+                    points[x][y - 1].moved = true;
+                }
+                else {
+                    points[x][y].slowDown();
+                    points[x][y].speedUp();
+                    points[x][y].move();
+                }
             }
         }
+
         this.repaint();
     }
 
@@ -96,29 +114,13 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 
         for (x = 0; x < points.length; ++x) {
             for (y = 0; y < points[x].length; ++y) {
-                float a = 1.0F;
-
-                if (points[x][y].type == 0)
-                    g.setColor(new Color(255, 255, 255));
-                else if (points[x][y].type == 1)
-                    g.setColor(new Color(250, 246, 6, 255));
-                else if (points[x][y].type == 2)
-                    g.setColor(new Color(22, 16, 194, 255));
-                else if (points[x][y].type == 3)
-                    g.setColor(new Color(241, 13, 13, 255));
-                else if (points[x][y].type == 4)
-                    g.setColor(new Color(2, 2, 2, 255));
-                else if (points[x][y].type == 5)
-                    g.setColor(new Color(30, 229, 18, 255));
-
-//                switch (points[x][y].type) {
-//                    case 0: g.setColor(new Color(255, 255, 255)); break;
-//                    case 1: g.setColor(new Color(255, 255, 0)); break;
-//                    case 2: g.setColor(new Color(0, 0, 255)); break;
-//                    case 3: g.setColor(new Color(255, 0, 0)); break;
-//                    case 5: g.setColor(new Color(0, 255, 0)); break;
-//                }
-
+                switch (points[x][y].type) {
+                    case 0: g.setColor(new Color(255, 255, 255)); break;
+                    case 1: g.setColor(new Color(255, 255, 0)); break;
+                    case 2: g.setColor(new Color(0, 0, 255)); break;
+                    case 3: g.setColor(new Color(255, 0, 0)); break;
+                    case 5: g.setColor(new Color(0, 255, 0)); break;
+                }
                 g.fillRect((x * size) + 1, (y * size) + 1, (size - 1), (size - 1));
             }
         }
